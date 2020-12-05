@@ -1,0 +1,9 @@
+---
+- hosts: k8s
+  roles:
+    - common
+    - docker
+    - kube
+- hosts: k8sworker
+  roles:
+    - k8sworker

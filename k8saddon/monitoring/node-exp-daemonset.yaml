@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: prometheus-node-exporter
+  namespace: monitoring
+  labels:
+    app: prometheus
+    component: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      name: prometheus-node-exporter
+      labels:
+        app: prometheus
+        component: node-exporter
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9100'
+    spec:
+      # Comment the following tolerations if must not be deployed on master
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+      - image: prom/node-exporter:v0.18.1
+        name: prometheus-node-exporter
+        ports:
+        - name: prom-node-exp
+          containerPort: 9100
+          hostPort: 9100
+      hostNetwork: true
+      hostPID: true

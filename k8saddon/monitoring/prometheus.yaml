@@ -1,0 +1,148 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - configmaps
+  verbs: ["get"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-core
+  namespace: monitoring
+  labels:
+    app: prometheus
+    component: core
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prometheus
+      component: core
+  template:
+    metadata:
+      name: prometheus-main
+      labels:
+        app: prometheus
+        component: core
+    spec:
+      # Comment the following tolerations if must not be deployed on master
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus:v2.13.1
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yaml'
+          - '--storage.tsdb.retention.time=2d'
+          - '--web.external-url=prometheus'
+          - '--web.enable-lifecycle'
+        ports:
+        - name: webui
+          containerPort: 9090
+        resources:
+          requests:
+            cpu: 500m
+            memory: 500M
+          limits:
+            cpu: 500m
+            memory: 500M
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus
+        - name: rules-volume
+          mountPath: /etc/prometheus-rules
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus-core
+      - name: rules-volume
+        configMap:
+          name: prometheus-rules
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+    component: core
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  selector:
+    app: prometheus
+    component: core
+  ports:
+    - port: 9090
+      protocol: TCP
+      name: webui
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: monitoringauth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - Monitoring'
+spec:
+  tls:
+    - hosts:
+        - busterkeen.francecentral.cloudapp.azure.com
+      secretName: monitoring-certificate
+  rules:
+    - host: busterkeen.francecentral.cloudapp.azure.com
+      http:
+        paths:
+          - path: /prometheus
+            backend:
+              serviceName: prometheus
+              servicePort: webui

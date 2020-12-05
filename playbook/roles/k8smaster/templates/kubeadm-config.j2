@@ -1,0 +1,32 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+bootstrapTokens:
+- description: default kubeadm bootstrap token
+  groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: "{{ join_token }}"
+  ttl: 0s
+  usages:
+  - signing
+  - authentication
+kind: InitConfiguration
+---
+apiServer:
+  certSANs:
+  - "{{ kube_load_balancer_dns }}"
+apiVersion: kubeadm.k8s.io/v1beta2
+certificatesDir: /etc/kubernetes/pki
+controlPlaneEndpoint: "{{ kube_load_balancer_dns }}:{{ kube_load_balancer_port }}"
+etcd:
+    external:
+        caFile: /etc/kubernetes/pki/etcd/ca.crt
+        certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt
+        endpoints:
+        - https://{{ etcd1_ip }}:2379
+        - https://{{ etcd2_ip }}:2379
+        - https://{{ etcd3_ip }}:2379
+        keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key
+imageRepository: k8s.gcr.io
+kind: ClusterConfiguration
+networking:
+  podSubnet: 11.244.0.0/16
+  serviceSubnet: 11.96.0.0/12

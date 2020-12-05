@@ -1,0 +1,43 @@
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    force_apt_get: yes
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 # One day in seconds
+
+- name: Add common packages
+  become: true
+  apt:
+    name: apt-transport-https
+    state: present
+
+- name: Add software common packages
+  become: true
+  apt:
+    name: software-properties-common
+    state: present  
+
+- name: Add certbot apt repository
+  become: true
+  apt_repository:
+    repo: ppa:certbot/certbot
+    state: present
+    update_cache: yes
+
+- name: Add certbot package
+  become: true
+  apt:
+    name: certbot
+    state: present
+
+- name: Add certbot nginx package
+  become: true
+  apt:
+    name: python-certbot-nginx
+    state: present  
+
+- name: Set timezone to Paris
+  become: true
+  timezone:
+    name: Europe/Paris

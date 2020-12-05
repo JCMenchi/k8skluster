@@ -1,0 +1,46 @@
+- name: add docker apt-key
+  become: true
+  apt_key: 
+    url: https://download.docker.com/linux/ubuntu/gpg 
+    state: present 
+
+    #- name: add docker repo
+    #  become: true
+    #  apt_repository: 
+    #    repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable' 
+    #    state: present 
+    #    update_cache: yes
+
+- name: install docker-ce
+  become: true
+  apt: 
+    name: docker.io
+    state: present
+    update_cache: yes
+
+- name: configure docker
+  become: true
+  template: 
+    src: daemon.json.j2 
+    dest: /etc/docker/daemon.json
+
+- name: Create docker systemd folder
+  become: true
+  file:
+    path: /etc/systemd/system/docker.service.d
+    recurse: yes
+    state: directory
+
+- name: Start docker
+  become: true
+  systemd:
+    name: docker.service
+    state: started
+    enabled: yes
+
+- name: adding docker rights to oper
+  become: true
+  user:
+    name: 'oper'
+    groups: docker
+    append: yes

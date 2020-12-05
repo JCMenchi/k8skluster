@@ -1,0 +1,19 @@
+{
+  "CN": "IKSTEST-ROOT-CA",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "FR",
+      "L": "Velizy",
+      "O": "IKSTEST",
+      "OU": "IKSTEST Root Certificate Authority"
+    }
+  ],
+  "ca": {
+    "expiry": "26280h"
+  }
+}
+

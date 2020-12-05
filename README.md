@@ -1,20 +1,24 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Kluster from scratch
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+The main purpose of this project is to build a kubernetes cluster from scratch using basic tools.
+This is not a production ready cluster, but a test bench to understand how to manage security,
+high availability, scalability in a kubernetes cluster.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Prerequisite
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+- To be able to deploy a real cluster a minimun number of computer is needed.
+The best solution is to use a IaaS solution to provision enough server.
+In this project we will use azure, to create compute and network resources.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://www.visualstudio.com/en-us/docs/git/create-a-readme). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+- Ubuntu server is used as operating system for this cluster
+
+- In order to manage many compute resources, an automation solution is needed.
+In this project we will use [ansible](https://docs.ansible.com/).
+
+## Architecture
+
+
+
+## Future extension
+
+Use something like [terraform](https://www.terraform.io/) to create computing resources, to be able to use other cloud provider.

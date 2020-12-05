@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: my-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-nginx
+  template:
+    metadata:
+      labels:
+        app: my-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-nginx-service
+spec:
+  selector:
+    app: my-nginx
+  ports:
+    - port: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+        - path: /hello(/|$)(.*)
+          backend:
+            serviceName: my-nginx-service
+            servicePort: 80

@@ -1,0 +1,56 @@
+- name: Create kube Folder
+  become: true
+  file: 
+   path: /etc/kubernetes/pki/etcd
+   recurse: yes
+   state: directory
+
+- name: kube copy certificates
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kubernetes/pki
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/*.crt"
+
+- name: kube copy private key
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kubernetes/pki
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/*.key"
+
+- name: kube copy public key
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kubernetes/pki
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/*.pub"
+
+- name: kube copy etcd CA certificate
+  become: true
+  copy:
+    src: "{{ role_path }}/files/etcd/ca.crt"
+    dest: /etc/kubernetes/pki/etcd/ca.crt
+    mode: 0400
+
+- name: Start kubelet
+  become: true
+  systemd:
+    name: kubelet.service
+    state: started
+    enabled: yes
+
+- name: Add control node
+  become: true
+  shell: >
+         docker ps | grep -q kube-apiserver 
+         && echo -n CONTROLLER
+         || kubeadm join busterkeenpro.francecentral.cloudapp.azure.com:443 --token e3rul1.78vt7ujoy1r0x5h8 --control-plane --discovery-token-unsafe-skip-ca-verification > /etc/kubernetes/install.log
+  register: is_controller
+  changed_when: is_controller.stdout != 'CONTROLLER'

@@ -1,0 +1,17 @@
+- name: Start kubelet
+  become: true
+  systemd:
+    name: kubelet.service
+    state: started
+    enabled: yes
+
+- name: Add worker node
+  become: true
+  shell: >
+         docker ps | grep -q k8s_POD_kube
+         && echo -n WORKER
+         || kubeadm join busterkeenpro.francecentral.cloudapp.azure.com:443 --token e3rul1.78vt7ujoy1r0x5h8 --discovery-token-unsafe-skip-ca-verification > /etc/kubernetes/install.log
+  register: is_worker
+  changed_when: is_worker.stdout != 'WORKER'
+
+

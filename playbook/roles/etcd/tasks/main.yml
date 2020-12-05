@@ -1,0 +1,49 @@
+- name: Install etcd 
+  become: true
+  apt:
+    name: etcd-server
+    state: present
+
+- name: copy ETCD 3.2.26
+  become: true
+  copy:
+    src: "{{ role_path }}/files/etcd"
+    dest: /usr/bin/etcd
+    owner: etcd
+    group: etcd
+    mode: 0755
+
+- name: copy ETCDCTL 3.2.26
+  become: true
+  copy:
+    src: "{{ role_path }}/files/etcdctl"
+    dest: /usr/bin/etcdctl
+    owner: etcd
+    group: etcd
+    mode: 0755
+
+- name: configure etcd
+  become: true
+  template: 
+    src: etcd.j2 
+    dest: /etc/default/etcd
+  notify: restart etcd
+
+- name: Etcd copy certificates
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /var/lib/etcd
+    owner: etcd
+    group: etcd
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/{{ ansible_hostname }}/*"
+
+- name: Start etcd
+  become: true
+  systemd:
+    name: etcd.service
+    state: started
+    enabled: yes
+

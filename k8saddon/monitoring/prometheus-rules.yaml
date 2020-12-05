@@ -1,0 +1,65 @@
+apiVersion: v1
+data:
+  default.rules: |
+    groups:
+      - name: base
+        rules:
+
+        # Alert for any instance that is unreachable for >5 minutes.
+        - alert: InstanceDown
+          expr: up{job="nodes-exporter"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            kind: infra
+          annotations:
+            summary: "Instance {{ $labels.instance }} down"
+            description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+
+      - name: k8s
+        rules:
+        - alert: NodeLoadAverage
+          expr: node_load5 > 1.5
+          for: 1m
+          labels:
+            severity: critical
+            kind: infra
+          annotations:
+            summary: "{{$labels.instance}}: High LA detected"
+            description: "{{$labels.instance}}: LA is above 1.5"
+
+        - alert: LowMemory
+          expr: (node_memory_MemFree_bytes / node_memory_MemTotal_bytes * 100) < 2
+          for: 2m
+          labels:
+            severity: critical
+            kind: infra
+          annotations:
+            summary: "{{$labels.instance}}: Low Memory"
+            description: "{{$labels.instance}}: Less than 2% of free memory"
+
+        - alert: LowDisk
+          expr: (node_filesystem_free_bytes / node_filesystem_size_bytes * 100) < 30
+          for: 1m
+          labels:
+            severity: major
+            kind: infra
+          annotations:
+            summary: "{{$labels.instance}}: Low Disk Space"
+            description: "{{$labels.instance}}: Less than 10% of free disk"
+
+        - alert: VeryLowDisk
+          expr: (node_filesystem_free_bytes / node_filesystem_size_bytes * 100) < 10
+          for: 1m
+          labels:
+            severity: critical
+            kind: infra
+          annotations:
+            summary: "{{$labels.instance}}: Low Disk Space"
+            description: "{{$labels.instance}}: Less than 10% of free disk"
+
+
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring

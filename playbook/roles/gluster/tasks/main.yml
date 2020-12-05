@@ -1,0 +1,91 @@
+---
+- name: Add glusterfs ppa
+  become: true
+  apt_repository:
+    repo: ppa:gluster/glusterfs-5
+
+- name: Install glusterfs 
+  become: true
+  apt:
+    name: glusterfs-server
+    state: present
+
+- name: Start glusterfs
+  become: true
+  systemd:
+    name: glusterd.service
+    state: started
+    enabled: yes
+
+- name: Peer gluster
+  become: true
+  gluster_peer:
+    state: present
+    nodes:
+      - prodcontrol1
+      - prodcontrol2
+      - prodcontrol3
+
+- name: Create folder for brick
+  become: true
+  file:
+    path: /data/brick1
+    recurse: yes
+    state: directory
+
+- name: create gluster volumes for snapshot
+  become: true
+  run_once: true
+  gluster_volume:
+    state: present
+    name: "{{ item }}"
+    replicas: 3
+    arbiters: 1
+    force: true
+    bricks: "/data/brick1/{{ item }}"
+    cluster:
+      - prodcontrol1
+      - prodcontrol2
+      - prodcontrol3
+    options:
+      { auth.allow: '11.0.0.*',
+        network.frame-timeout: '900',
+        network.ping-timeout: '20',
+        storage.owner-uid: '1000',
+        storage.owner-gid: '1000'
+      }
+  loop:
+    - srv1snapshot
+    - srv2snapshot
+
+- name: create gluster general volumes
+  become: true
+  run_once: true
+  gluster_volume:
+    state: present
+    name: "{{ item }}"
+    replicas: 3
+    arbiters: 1
+    force: true
+    bricks: "/data/brick1/{{ item }}"
+    cluster:
+      - prodcontrol1
+      - prodcontrol2
+      - prodcontrol3
+    options:
+      { auth.allow: '11.0.0.*',
+        network.frame-timeout: '900',
+        network.ping-timeout: '20',
+        storage.owner-uid: '1000',
+        storage.owner-gid: '1000'
+      }
+  loop:
+    - vol1
+    - vol2
+    - vol3
+    - vol4
+    - vol5
+    - vol6
+    - vol7
+    - vol8
+    - vol9

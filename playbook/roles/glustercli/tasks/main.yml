@@ -1,0 +1,10 @@
+---
+- name: Add glusterfs ppa
+  become: true
+  apt_repository:
+    repo: ppa:gluster/glusterfs-5
+- name: Install glusterfs cli 
+  become: true
+  apt:
+    name: glusterfs-client
+    state: present

@@ -1,0 +1,81 @@
+- name: Create kube Folder
+  become: true
+  file: 
+   path: /etc/kubernetes/pki/etcd
+   recurse: yes
+   state: directory
+
+- name: kube copy certificates
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kubernetes/pki
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/*.crt"
+
+- name: kube copy private key
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kubernetes/pki
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/*.key"
+
+- name: kube copy public key
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kubernetes/pki
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/*.pub"
+
+- name: kube copy etcd CA certificate
+  become: true
+  copy:
+    src: "{{ role_path }}/files/etcd/ca.crt"
+    dest: /etc/kubernetes/pki/etcd/ca.crt
+    mode: 0400
+
+- name: kube copy yaml 
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kubernetes
+    mode: 0400
+  with_fileglob:
+  - "{{ role_path }}/files/*.yaml"
+
+- name: configure kubeadm
+  become: true
+  template: 
+    src: kubeadm-config.j2 
+    dest: /etc/kubernetes/kubeadm-config.yaml
+
+- name: Start kubelet
+  become: true
+  systemd:
+    name: kubelet.service
+    state: started
+    enabled: yes
+
+- name: Create first control node
+  become: true
+  shell: >
+         docker ps | grep -q kube-controller 
+         && echo -n CONTROLLER
+         || kubeadm init --config /etc/kubernetes/kubeadm-config.yaml > /etc/kubernetes/install.log
+  register: is_controller
+  changed_when: is_controller.stdout != 'CONTROLLER'
+
+- name: Add kube-router
+  become: true
+  shell: > 
+         docker ps | grep -q kube-router 
+         && echo -n KROUTER
+         || KUBECONFIG=/etc/kubernetes/admin.conf kubectl apply -f /etc/kubernetes/kubeadm-kuberouter.yaml
+  register: has_router
+  changed_when: has_router.stdout != 'KROUTER'
+

@@ -1,0 +1,52 @@
+- name: add kube apt-key
+  become: true
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: add kube repo
+  become: true
+  apt_repository:
+    repo: 'deb https://apt.kubernetes.io/ kubernetes-xenial main'
+    state: present
+    update_cache: yes
+
+- name: install kube
+  become: true
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - kubelet
+    - kubeadm
+    - kubectl
+    - ipvsadm
+
+- name: Load kube image
+  become: true
+  shell: >
+         docker images | grep -q k8s.gcr.io/kube-proxy
+         && echo -n IMAGE_FOUND
+         || kubeadm config images pull
+  register: has_image
+  changed_when: has_image.stdout != 'IMAGE_FOUND'
+
+- name: Create folder for local volume
+  become: true
+  file:
+   path: /data
+   recurse: yes
+   state: directory
+
+- name: Create folder for vol1
+  become: true
+  file:
+    path: "/data/{{ item }}"
+    recurse: yes
+    state: directory
+    mode: '777'
+  with_items:
+    - vol1
+    - vol2
+    - vol3

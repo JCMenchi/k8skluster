@@ -1,0 +1,8 @@
+---
+  # default value for kube var
+  etcd1_ip: 11.0.0.20
+  etcd2_ip: 11.0.0.21
+  etcd3_ip: 11.0.0.22
+  kube_load_balancer_dns: busterkeenpro.francecentral.cloudapp.azure.com
+  kube_load_balancer_port: 443
+  join_token: e3rul1.78vt7ujoy1r0x5h8

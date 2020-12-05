@@ -1,0 +1,26 @@
+---
+# 
+- hosts: gluster
+  roles:
+    - common
+    - gluster
+- hosts: etcd
+  roles:
+    - common
+#    - glustercli
+    - etcd
+- hosts: k8s
+  roles:
+    - common
+    - glustercli
+    - docker
+    - kube
+- hosts: k8smaster
+  roles:
+    - k8smaster
+- hosts: k8scontrol
+  roles:
+    - k8scontrol
+- hosts: k8sworker
+  roles:
+    - k8sworker
