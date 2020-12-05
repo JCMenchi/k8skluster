@@ -50,7 +50,7 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v3
         env:
-          ANSIBLE_DIRECTORY: /playbook
+          ANSIBLE_DIRECTORY: /playbook/roles
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: develop
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
