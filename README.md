@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Lint Code Base](https://github.com/JCMenchi/k8skluster/workflows/Lint%20Code%20Base/badge.svg)
+![Lang](https://img.shields.io/badge/Language-sh_yml-blue)
 
 The main purpose of this project is to build a kubernetes cluster from scratch using basic tools.
 This is not a production ready cluster, but a test bench to understand how to manage security,
@@ -20,7 +21,7 @@ In this project we will use [ansible](https://docs.ansible.com/).
 
 ## Architecture
 
-
+![Virtual Machine Infrastructure](doc/infra.png)
 
 ## Future extension
 
