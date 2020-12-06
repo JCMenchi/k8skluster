@@ -5,6 +5,7 @@
 #   az account set -s ACCOUNT_ID
 
 RESGROUP=kluster
+ADMRESGROUP=RG-ADM
 
 vmlist="prodcontrol1 prodcontrol2 prodcontrol3 prodworker1 prodworker2 prodworker3 prodworker4 prodworker5"
 
@@ -13,4 +14,4 @@ for vm in ${vmlist}; do
     az vm deallocate --no-wait -g ${RESGROUP} --name "${vm}"
 done
 
-az vm deallocate --no-wait -g test --name jumpbox
+az vm deallocate --no-wait -g ${ADMRESGROUP} --name jumpbox
