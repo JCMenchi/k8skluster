@@ -25,7 +25,7 @@ ADMINPUBKEY=${ADMINPRIVKEY}.pub
 
 # Create resource group if needed
 v=$(az group exists --output json --name ${RESGROUP})
-if [ $v = "false" ]; then
+if [ "$v" = "false" ]; then
     az group create --name ${RESGROUP} --location ${LOCATION}
 fi
 
@@ -41,7 +41,7 @@ fi
 # Create and setup VPC for admin
 #
 t=$(az network vnet show -n ${VPCNAME} --resource-group ${RESGROUP} > /dev/null 2>&1; echo $?)
-if [ $t = 3 ]; then
+if [ "$t" = 3 ]; then
     echo "Create VPC ${VPCNAME}"
     az network vnet create -n ${VPCNAME} --resource-group ${RESGROUP} --address-prefix ${VPCIPPREFIX}.0/8 --subnet-name adm2subnet \
        --subnet-prefix ${VPCIPPREFIX}.0/24 --location ${LOCATION} --tags zonetype=adm
@@ -54,10 +54,10 @@ fi
 #
 
 t=$(az vm show -g ${RESGROUP} -n ${VMNAME} > /dev/null 2>&1; echo $?)
-if [ $t = 3 ]; then
+if [ "$t" = 3 ]; then
     
-    t=$(az network public-ip list --resource-group ${RESGROUP} | grep jb-publicip | wc -l)
-    if [ $t = 0 ]; then
+    t=$(az network public-ip list --resource-group ${RESGROUP} | grep -c jb-publicip)
+    if [ "$t" = 0 ]; then
         echo "Create Public IP"
         az network public-ip create --resource-group ${RESGROUP} --name jb-publicip \
           --allocation-method Static --sku Standard --dns-name ${DNSNAME}

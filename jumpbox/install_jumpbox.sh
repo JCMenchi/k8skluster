@@ -47,50 +47,54 @@ else
 fi
 
 t=$(grep -q prodcontrol1 /etc/hosts; echo $?)
-if [ $t == 1 ]; then
+if [ "$t" == 1 ]; then
     echo "Edit /etc/hosts"
-    echo "11.0.0.20 prodcontrol1" >> /etc/hosts
-    echo "11.0.0.21 prodcontrol2" >> /etc/hosts
-    echo "11.0.0.22 prodcontrol3" >> /etc/hosts
-    echo "" >> /etc/hosts
-    echo "11.0.0.30 prodworker1" >> /etc/hosts
-    echo "11.0.0.31 prodworker2" >> /etc/hosts
-    echo "11.0.0.32 prodworker3" >> /etc/hosts
-    echo "11.0.0.33 prodworker4" >> /etc/hosts
-    echo "11.0.0.34 prodworker5" >> /etc/hosts
+    {
+        echo "11.0.0.20 prodcontrol1"
+        echo "11.0.0.21 prodcontrol2"
+        echo "11.0.0.22 prodcontrol3"
+        echo ""
+        echo "11.0.0.30 prodworker1"
+        echo "11.0.0.31 prodworker2"
+        echo "11.0.0.32 prodworker3"
+        echo "11.0.0.33 prodworker4"
+        echo "11.0.0.34 prodworker5"
+    } >> /etc/hosts
 fi
 
 t=$(grep -q prodcontrol1 /etc/ansible/hosts; echo $?)
-if [ $t == 1 ]; then
+if [ "$t" == 1 ]; then
     echo edit ansible /etc/ansible/hosts
-    echo "[etcd]" >> /etc/ansible/hosts
-    echo "prodcontrol1" >> /etc/ansible/hosts
-    echo "prodcontrol2" >> /etc/ansible/hosts
-    echo "prodcontrol3" >> /etc/ansible/hosts
-    echo "" >> /etc/ansible/hosts
-    echo "[k8s]" >> /etc/ansible/hosts
-    echo "prodcontrol1" >> /etc/ansible/hosts
-    echo "prodcontrol2" >> /etc/ansible/hosts
-    echo "prodcontrol3" >> /etc/ansible/hosts
-    echo "prodworker1" >> /etc/ansible/hosts
-    echo "prodworker2" >> /etc/ansible/hosts
-    echo "prodworker3" >> /etc/ansible/hosts
-    echo "prodworker4" >> /etc/ansible/hosts
-    echo "prodworker5" >> /etc/ansible/hosts
-    echo "" >> /etc/ansible/hosts
-    echo "[k8smaster]" >> /etc/ansible/hosts
-    echo "prodcontrol1" >> /etc/ansible/hosts
-    echo "" >> /etc/ansible/hosts
-    echo "[k8scontrol]" >> /etc/ansible/hosts
-    echo "prodcontrol2" >> /etc/ansible/hosts
-    echo "prodcontrol3" >> /etc/ansible/hosts
-    echo "" >> /etc/ansible/hosts
-    echo "[k8sworker]" >> /etc/ansible/hosts
-    echo "prodworker1" >> /etc/ansible/hosts
-    echo "prodworker2" >> /etc/ansible/hosts
-    echo "prodworker3" >> /etc/ansible/hosts
-    echo "prodworker4" >> /etc/ansible/hosts
-    echo "prodworker5" >> /etc/ansible/hosts
+    {
+        echo "[etcd]"
+        echo "prodcontrol1"
+        echo "prodcontrol2"
+        echo "prodcontrol3"
+        echo ""
+        echo "[k8s]"
+        echo "prodcontrol1"
+        echo "prodcontrol2"
+        echo "prodcontrol3"
+        echo "prodworker1"
+        echo "prodworker2"
+        echo "prodworker3"
+        echo "prodworker4"
+        echo "prodworker5"
+        echo ""
+        echo "[k8smaster]"
+        echo "prodcontrol1"
+        echo ""
+        echo "[k8scontrol]"
+        echo "prodcontrol2"
+        echo "prodcontrol3"
+        echo ""
+        echo "[k8sworker]"
+        echo "prodworker1"
+        echo "prodworker2"
+        echo "prodworker3"
+        echo "prodworker4"
+        echo "prodworker5"
+    }  >> /etc/ansible/hosts
 fi
 
 #--------------------------------------------------------------------------

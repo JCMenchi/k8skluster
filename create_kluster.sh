@@ -19,7 +19,7 @@ fi
 
 # Check azure connection
 res=$(az group list > /dev/null 2>/dev/null; echo $?)
-if [ $res = 1 ]; then
+if [ "$res" = 1 ]; then
     echo "FATAL: No connection to azure. (az login)"
     exit 2
 fi
@@ -28,7 +28,7 @@ fi
 if [ ! -e keystore ]; then
     mkdir keystore
 fi
-cd pki
+cd pki || exit 101
 ./gen_cert.sh
 cd ..
 
@@ -37,32 +37,34 @@ cd ..
 
 # use kubeadm to generate certificates
 if [ ! -e pki/ca.key ]; then
-    kubeadm init phase certs --cert-dir $(pwd)/pki ca
-    kubeadm init phase certs --cert-dir $(pwd)/pki front-proxy-ca
-    kubeadm init phase certs --cert-dir $(pwd)/pki sa
+    kubeadm init phase certs --cert-dir "$(pwd)"/pki ca
+    kubeadm init phase certs --cert-dir "$(pwd)"/pki front-proxy-ca
+    kubeadm init phase certs --cert-dir "$(pwd)"/pki sa
 
     cp pki/ca.* pki/sa.* pki/front-proxy-ca.* playbook/roles/k8scontrol/files
     cp pki/ca.* pki/sa.* pki/front-proxy-ca.* playbook/roles/k8smaster/files
 
     kubeadm init phase kubeconfig admin --control-plane-endpoint=busterkeenpro.francecentral.cloudapp.azure.com \
-                      --cert-dir=$(pwd)/pki --kubeconfig-dir=$(pwd)
-    if [ ! -e ${HOME}/.kube ]; then
-        mkdir ${HOME}/.kube
+                      --cert-dir="$(pwd)"/pki --kubeconfig-dir="$(pwd)"
+    if [ ! -e "${HOME}"/.kube ]; then
+        mkdir "${HOME}"/.kube
     fi
-    mv admin.conf ${HOME}/.kube/config
+    mv admin.conf "${HOME}"/.kube/config
 fi
 
 #  copy private key to connect to host
 # add ssh config file
-cp keystore/prod_rsa ${HOME}/.ssh
-if [ ! -e ${HOME}/.ssh/config ]; then
-    echo "Host prodcontrol*" > ${HOME}/.ssh/config
-    echo "    User oper" >> ${HOME}/.ssh/config
-    echo "    IdentityFile ~/.ssh/prod_rsa" >> ${HOME}/.ssh/config
-    echo "" >> ${HOME}/.ssh/config
-    echo "Host prodworker*" >> ${HOME}/.ssh/config
-    echo "    User oper" >> ${HOME}/.ssh/config
-    echo "    IdentityFile ~/.ssh/prod_rsa" >> ${HOME}/.ssh/config
+cp keystore/prod_rsa "${HOME}"/.ssh
+if [ ! -e "${HOME}"/.ssh/config ]; then
+    {
+        echo "Host prodcontrol*"
+        echo "    User oper"
+        echo "    IdentityFile ~/.ssh/prod_rsa"
+        echo ""
+        echo "Host prodworker*"
+        echo "    User oper"
+        echo "    IdentityFile ~/.ssh/prod_rsa"
+    } > "${HOME}"/.ssh/config
 fi
 
 export ANSIBLE_HOST_KEY_CHECKING=False
@@ -75,7 +77,7 @@ sleep 60
 ./update_az_route.sh
 
 # install admin app
-cd k8saddon
+cd k8saddon || exit 102
 ./install_addons.sh
 cd ..
 
